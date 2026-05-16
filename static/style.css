@@ -1,0 +1,97 @@
+:root {
+  --rs-blue: #003366;
+  --rs-blue-light: #0055a5;
+  --rs-accent: #e8f0fb;
+}
+
+body {
+  background: #f4f6fb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  background: var(--rs-blue) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+/* Text colour helper */
+.text-primary-rs { color: var(--rs-blue) !important; }
+
+/* Step cards */
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,51,102,.08);
+}
+.step-header {
+  background: var(--rs-accent);
+  font-weight: 600;
+  color: var(--rs-blue);
+  border-bottom: 1px solid #d0dff5;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+.step-badge {
+  background: var(--rs-blue);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Upload area */
+.upload-area {
+  border: 2px dashed #a0b8d8;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  background: #f8fbff;
+  transition: border-color .2s, background .2s;
+}
+.upload-area.dragover {
+  border-color: var(--rs-blue);
+  background: var(--rs-accent);
+}
+
+/* Primary button */
+.btn-primary-rs {
+  background: var(--rs-blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+}
+.btn-primary-rs:hover {
+  background: var(--rs-blue-light);
+  color: #fff;
+}
+
+/* Summary stat cards */
+.stat-card {
+  border-radius: 10px;
+  padding: .9rem 1rem;
+  color: #fff;
+  font-weight: 600;
+}
+.stat-card .stat-num { font-size: 1.8rem; line-height: 1; }
+.stat-card .stat-lbl { font-size: .78rem; opacity: .85; }
+
+.stat-total  { background: var(--rs-blue); }
+.stat-pdf    { background: #1a7a4a; }
+.stat-email  { background: #b35900; }
+.stat-gagal  { background: #9b1c1c; }
+
+/* Table */
+.table thead th { font-size: .8rem; letter-spacing: .03em; }
+.badge-ok   { background:#1a7a4a; }
+.badge-fail { background:#9b1c1c; }
+.badge-skip { background:#6c757d; }
