@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Penggajian – RS. Delima Asih Sisma Medika</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-dark">
+  <div class="container px-4">
+    <span class="navbar-brand d-flex align-items-center gap-2">
+      <i class="bi bi-hospital fs-4"></i>
+      <div>
+        <div class="fw-bold">Sistem Penggajian</div>
+        <div class="small opacity-75" style="font-size:.75rem">RS. Delima Asih Sisma Medika</div>
+      </div>
+    </span>
+  </div>
+</nav>
+
+<main class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div class="mb-4">
+        <h5 class="fw-bold text-rs mb-1"><i class="bi bi-receipt me-2"></i>Generate Slip Gaji</h5>
+        <p class="text-muted small mb-0">Unggah data Excel → slip PDF ter-enkripsi → download langsung di browser.</p>
+      </div>
+
+      <!-- Template download -->
+      <div class="alert alert-info d-flex align-items-center gap-2 py-2 small">
+        <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+        <span>Belum punya template?
+          <a href="https://github.com/dimas-push/sistem-penggajian/raw/main/data_karyawan.xlsx"
+             class="alert-link fw-semibold">Download template Excel</a>
+        </span>
+      </div>
+
+      <form id="formPenggajian">
+
+        <!-- STEP 1 -->
+        <div class="card mb-3">
+          <div class="card-header step-header">
+            <span class="step-badge">1</span> Informasi Rumah Sakit
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-7">
+                <label class="form-label fw-semibold small">Nama Rumah Sakit</label>
+                <input type="text" id="companyName" class="form-control form-control-sm"
+                       value="RS. DELIMA ASIH SISMA MEDIKA" required>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label fw-semibold small">Periode Penggajian</label>
+                <input type="text" id="payrollMonth" class="form-control form-control-sm"
+                       placeholder="cth: Mei 2026" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="card mb-3">
+          <div class="card-header step-header">
+            <span class="step-badge">2</span> Upload Data Karyawan (.xlsx)
+          </div>
+          <div class="card-body">
+            <div class="upload-area" id="uploadArea">
+              <i class="bi bi-file-earmark-excel fs-1 text-success"></i>
+              <p class="mb-1 mt-2 small">Drag &amp; drop file Excel di sini, atau</p>
+              <label class="btn btn-outline-success btn-sm mt-1">
+                Pilih File
+                <input type="file" id="excelFile" accept=".xlsx,.xls" class="d-none" required>
+              </label>
+              <p class="text-muted small mt-2 mb-0" id="fileName">Belum ada file dipilih</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Email (EmailJS) -->
+        <div class="card mb-3">
+          <div class="card-header step-header">
+            <span class="step-badge">3</span> Kirim Email (Opsional)
+          </div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="sendEmailToggle" role="switch">
+              <label class="form-check-label small fw-semibold" for="sendEmailToggle">
+                Kirim slip gaji otomatis via EmailJS
+              </label>
+            </div>
+            <div id="emailFields" class="d-none">
+              <div class="alert alert-warning small py-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Butuh akun <strong>EmailJS</strong> (gratis 200 email/bulan).
+                <a href="https://www.emailjs.com" target="_blank" class="alert-link">Daftar di sini</a>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <label class="form-label small">Service ID</label>
+                  <input type="text" id="ejsServiceId" class="form-control form-control-sm" placeholder="service_xxxxxx">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small">Template ID</label>
+                  <input type="text" id="ejsTemplateId" class="form-control form-control-sm" placeholder="template_xxxxxx">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small">Public Key</label>
+                  <input type="text" id="ejsPublicKey" class="form-control form-control-sm" placeholder="xxxxxxxxxxx">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="d-grid mb-4">
+          <button type="submit" class="btn btn-rs btn-lg" id="btnProses">
+            <i class="bi bi-play-circle me-2"></i>Generate Slip Gaji
+          </button>
+        </div>
+      </form>
+
+      <!-- Progress -->
+      <div id="progressBox" class="d-none mb-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span id="progressLabel">Memproses…</span>
+          <span id="progressCount">0 / 0</span>
+        </div>
+        <div class="progress" style="height:10px">
+          <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+               role="progressbar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Hasil -->
+      <div id="hasilBox" class="d-none">
+        <hr>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h6 class="fw-bold mb-0"><i class="bi bi-check2-circle me-2 text-success"></i>Hasil Generate</h6>
+          <button class="btn btn-outline-success btn-sm" id="btnDownloadAll">
+            <i class="bi bi-download me-1"></i>Download Semua (ZIP)
+          </button>
+        </div>
+
+        <!-- Summary -->
+        <div class="row g-2 mb-3" id="summaryCards"></div>
+
+        <!-- Tabel -->
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle small">
+            <thead class="table-dark">
+              <tr>
+                <th>NRK</th>
+                <th>Nama</th>
+                <th class="text-center">PDF</th>
+                <th class="text-center">Email</th>
+                <th>Password</th>
+                <th class="text-center">Download</th>
+              </tr>
+            </thead>
+            <tbody id="hasilTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="text-center text-muted small py-3 border-top">
+  &copy; 2026 RS. Delima Asih Sisma Medika &mdash; Sistem Penggajian Otomatis
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
