@@ -156,7 +156,9 @@ async function handleFile(file) {
     $('uploadArea').classList.add('d-none');
     $('fileInfo').classList.remove('d-none');
     $('fileName').textContent = file.name;
-    $('fileStats').textContent = `${employees.length} karyawan ditemukan · ${(file.size / 1024).toFixed(1)} KB`;
+    const hasEmail = employees.some(r => r.Email && String(r.Email).includes('@'));
+    $('fileStats').textContent = `${employees.length} karyawan ditemukan · ${(file.size / 1024).toFixed(1)} KB` +
+      (hasEmail ? '' : ' · ⚠ Kolom Email tidak ditemukan');
     toast(`${employees.length} karyawan berhasil dimuat.`, 'success');
   } catch (err) {
     toast('Gagal membaca Excel: ' + err.message, 'danger');
@@ -178,12 +180,58 @@ function readExcel(file) {
         const wb   = XLSX.read(e.target.result, { type: 'array' });
         const ws   = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(ws, { defval: 0 });
-        resolve(data);
+        resolve(data.map(normalizeRow));
       } catch (err) { reject(err); }
     };
     reader.onerror = () => reject(new Error('Gagal membaca file.'));
     reader.readAsArrayBuffer(file);
   });
+}
+
+// Map MEI.csv / template Excel columns → internal field names
+function normalizeRow(r) {
+  const g = (...keys) => { for (const k of keys) { const v = r[k]; if (v !== undefined && v !== '' && v !== 0) return v; } return r[keys[0]] ?? 0; };
+  const s = (...keys) => { for (const k of keys) { const v = r[k]; if (v !== undefined && v !== '') return v; } return ''; };
+
+  // Detect if already internal format
+  if (r.Gaji !== undefined) return r;
+
+  return {
+    NRK:              s('NIK','NRK'),
+    Nama:             s('Nama Karyawan','Nama'),
+    Jabatan:          s('Jabatan'),
+    Unit:             s('Unit','UNIT'),
+    Golongan:         s('Gol','Golongan'),
+    Email:            s('Email'),
+    No_Slip:          s('NO','No_Slip'),
+    No_Slip_Rek:      s('Norek','No_Slip_Rek'),
+    Alpa_Ijin:        g('Alpa_Ijin','Alpa/Ijin'),
+    Point:            g('Point'),
+    // Penghasilan
+    Gaji:             g('Gaji Pokok','Gaji'),
+    Tj_Jabatan:       g('Tunjangan Jabatan','Tj_Jabatan'),
+    Tj_Insentif:      g('Fix Insentif','Tj_Insentif'),
+    Lembur:           g('Lembur'),
+    Tj_Lain:          g('Tunjangan Fungsi','Tj_Lain'),
+    Tj_Fasilitas:     g('Uang Makan','Tj_Fasilitas'),
+    // Potongan karyawan
+    Pot_BPJS_TK:      g('BPJS TK','Pot_BPJS_TK'),
+    Pot_BPJS_Kes:     g('BPJS KES','Pot_BPJS_Kes'),
+    Pot_BPJS_Pensiun: g('BPJS PENSIUN','Pot_BPJS_Pensiun'),
+    Pot_Absensi:      g('Absensi','Pot_Absensi'),
+    Pot_Obat:         g('Obat','Pot_Obat'),
+    Pot_Rawat_Jalan:  g('R.jalan','Pot_Rawat_Jalan'),
+    Pot_Rawat_Inap:   g('R.Inap','Pot_Rawat_Inap'),
+    Pot_S_Wajib:      g('S.Wajib','Pot_S_Wajib'),
+    Pot_Koperasi:     g('Angsuran Koperasi','Koperasi','Pot_Koperasi'),
+    Pot_Kantin:       g('Kantin','Pot_Kantin'),
+    Pot_Lain:         g('Olahraga','Pot_Lain'),
+    Pot_Insentif:     g('Insentif','Pot_Insentif'),
+    // Iuran RS (tanggungan rumah sakit)
+    RS_BPJS_TK:       g('RS_BPJS_TK'),
+    RS_BPJS_Kes:      g('RS_BPJS_Kes'),
+    RS_BPJS_Pensiun:  g('RS_BPJS_Pensiun'),
+  };
 }
 
 // ── Email toggle ─────────────────────────────────────────────
