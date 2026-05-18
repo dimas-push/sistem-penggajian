@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts } from 'https://esm.sh/@cantoo/pdf-lib@1.17.1';
+import { PDFDocument, rgb, StandardFonts } from 'https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@1.17.1/dist/pdf-lib.esm.min.js';
 
 // ── Globals ──────────────────────────────────────────────────
 const generatedPDFs = {}; // { NRK: Uint8Array }
